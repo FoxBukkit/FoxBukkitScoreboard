@@ -16,10 +16,6 @@
  */
 package com.foxelbox.foxbukkit.scoreboard;
 
-import com.foxelbox.dependencies.config.Configuration;
-import com.foxelbox.dependencies.redis.CacheMap;
-import com.foxelbox.dependencies.redis.RedisManager;
-import com.foxelbox.dependencies.threading.SimpleThreadCreator;
 import com.foxelbox.foxbukkit.permissions.FoxBukkitPermissionHandler;
 import com.foxelbox.foxbukkit.permissions.FoxBukkitPermissions;
 import org.bukkit.entity.Player;
