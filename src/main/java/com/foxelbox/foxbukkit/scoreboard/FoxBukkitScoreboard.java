@@ -20,6 +20,8 @@ import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.dependencies.redis.CacheMap;
 import com.foxelbox.dependencies.redis.RedisManager;
 import com.foxelbox.dependencies.threading.SimpleThreadCreator;
+import com.foxelbox.foxbukkit.permissions.FoxBukkitPermissionHandler;
+import com.foxelbox.foxbukkit.permissions.FoxBukkitPermissions;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -34,8 +36,11 @@ import java.util.Map;
 import java.util.UUID;
 
 public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
-    public Configuration configuration;
-    public RedisManager redisManager;
+    Configuration configuration;
+    RedisManager redisManager;
+
+    private FoxBukkitPermissions permissions;
+    private FoxBukkitPermissionHandler permissionHandler;
 
     @Override
     public void onDisable() {
@@ -43,7 +48,6 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
     }
 
     private Map<String,String> rankTags;
-    private Map<String,String> playerRanks;
 
     @Override
     public void onEnable() {
@@ -51,7 +55,10 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
         configuration = new Configuration(getDataFolder());
         redisManager = new RedisManager(new SimpleThreadCreator(), configuration);
 
-        playerRanks = redisManager.createCachedRedisMap("playergroups").addOnChangeHook(new CacheMap.OnChangeHook() {
+        permissions = (FoxBukkitPermissions)getServer().getPluginManager().getPlugin("FoxBukkitPermissions");
+        permissionHandler = permissions.getHandler();
+
+        redisManager.createCachedRedisMap("playergroups").addOnChangeHook(new CacheMap.OnChangeHook() {
             @Override
             public void onEntryChanged(String key, String value) {
                 UUID uuid = UUID.fromString(key);
@@ -76,7 +83,7 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
     private boolean mainScoreboardRegistered = false;
 
     public void setPlayerScoreboardTeam(Player ply) {
-        setPlayerScoreboardTeam(ply, playerRanks.get(ply.getUniqueId().toString()));
+        setPlayerScoreboardTeam(ply, permissionHandler.getGroup(ply.getUniqueId()));
     }
 
     public void setPlayerScoreboardTeam(Player ply, String rank) {
