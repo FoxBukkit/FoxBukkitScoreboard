@@ -35,6 +35,12 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
     private FoxBukkitPermissionHandler permissionHandler;
 
     @Override
+    public void onDisable() {
+        super.onDisable();
+        registeredScoreboards.clear();
+    }
+
+    @Override
     public void onEnable() {
         permissions = (FoxBukkitPermissions)getServer().getPluginManager().getPlugin("FoxBukkitPermissions");
         permissionHandler = permissions.getHandler();
