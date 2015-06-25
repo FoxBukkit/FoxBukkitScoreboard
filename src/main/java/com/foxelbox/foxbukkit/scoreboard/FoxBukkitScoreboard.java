@@ -32,44 +32,26 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.UUID;
 
 public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
-    Configuration configuration;
-    RedisManager redisManager;
-
     private FoxBukkitPermissions permissions;
     private FoxBukkitPermissionHandler permissionHandler;
 
     @Override
-    public void onDisable() {
-        redisManager.stop();
-    }
-
-    private Map<String,String> rankTags;
-
-    @Override
     public void onEnable() {
-        getDataFolder().mkdirs();
-        configuration = new Configuration(getDataFolder());
-        redisManager = new RedisManager(new SimpleThreadCreator(), configuration);
-
         permissions = (FoxBukkitPermissions)getServer().getPluginManager().getPlugin("FoxBukkitPermissions");
         permissionHandler = permissions.getHandler();
 
-        redisManager.createCachedRedisMap("playergroups").addOnChangeHook(new CacheMap.OnChangeHook() {
+        permissionHandler.addRankChangeHandler(new FoxBukkitPermissionHandler.OnRankChange() {
             @Override
-            public void onEntryChanged(String key, String value) {
-                UUID uuid = UUID.fromString(key);
+            public void rankChanged(UUID uuid, String rank) {
                 Player ply = getServer().getPlayer(uuid);
-                if(ply != null) {
-                    setPlayerScoreboardTeam(ply, value);
+                if (ply != null) {
+                    setPlayerScoreboardTeam(ply, rank);
                 }
             }
         });
-
-        rankTags = redisManager.createCachedRedisMap("ranktags");
 
         getServer().getPluginManager().registerEvents(this, this);
     }
@@ -109,7 +91,7 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
             Team team = scoreboard.getTeam(rank);
             if(team == null) {
                 team = scoreboard.registerNewTeam(rank);
-                team.setPrefix(rankTags.get(rank));
+                team.setPrefix(permissionHandler.getGroupTag(rank));
                 team.setSuffix("\u00a7r");
             }
             team.addPlayer(ply);
