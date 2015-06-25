@@ -1,4 +1,3 @@
 name: FoxBukkitScoreboard
 main: com.foxelbox.foxbukkit.scoreboard.FoxBukkitScoreboard
 version: 1.0.0
-depend: [FoxBukkitPermissions]

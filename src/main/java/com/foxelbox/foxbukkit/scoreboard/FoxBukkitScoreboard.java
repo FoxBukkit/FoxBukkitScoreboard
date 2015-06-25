@@ -21,6 +21,10 @@ import com.foxelbox.dependencies.redis.CacheMap;
 import com.foxelbox.dependencies.redis.RedisManager;
 import com.foxelbox.dependencies.threading.SimpleThreadCreator;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -29,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
-public class FoxBukkitScoreboard extends JavaPlugin {
+public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
     public Configuration configuration;
     public RedisManager redisManager;
 
@@ -59,6 +63,13 @@ public class FoxBukkitScoreboard extends JavaPlugin {
         });
 
         rankTags = redisManager.createCachedRedisMap("ranktags");
+
+        getServer().getPluginManager().registerEvents(this, this);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        setPlayerScoreboardTeam(event.getPlayer());
     }
 
     private final ArrayList<Scoreboard> registeredScoreboards = new ArrayList<>();
