@@ -23,27 +23,36 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
-    private FoxBukkitPermissions permissions;
-    private FoxBukkitPermissionHandler permissionHandler;
+    FoxBukkitPermissions permissions;
+    FoxBukkitPermissionHandler permissionHandler;
+    private StatsKeeper statsKeeper;
+
+    HashMap<UUID, Scoreboard> playerStatsScoreboards = new HashMap<>();
+    private final ArrayList<Scoreboard> registeredScoreboards = new ArrayList<>();
+    private boolean mainScoreboardRegistered = false;
 
     @Override
     public void onDisable() {
         super.onDisable();
         registeredScoreboards.clear();
+        playerStatsScoreboards.clear();
+        statsKeeper.onDisable();
     }
 
     @Override
     public void onEnable() {
         permissions = (FoxBukkitPermissions)getServer().getPluginManager().getPlugin("FoxBukkitPermissions");
         permissionHandler = permissions.getHandler();
+        statsKeeper = new StatsKeeper(this);
 
         permissionHandler.addRankChangeHandler(new FoxBukkitPermissionHandler.OnRankChange() {
             @Override
@@ -55,22 +64,50 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
             }
         });
 
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            @Override
+            public void run() {
+                statsKeeper.refreshAllStats();
+            }
+        }, 20, 40);
+
         getServer().getPluginManager().registerEvents(this, this);
+    }
+
+    public void setPlayerScoreboard(Player ply, Scoreboard scoreboard) {
+        if(scoreboard == null) {
+            scoreboard = playerStatsScoreboards.get(ply.getUniqueId());
+        }
+        ply.setScoreboard(scoreboard);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        registeredScoreboards.remove(playerStatsScoreboards.remove(event.getPlayer().getUniqueId()));
+        statsKeeper.onDisconnect(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        setPlayerScoreboardTeam(event.getPlayer());
+        final Player player = event.getPlayer();
+        Scoreboard playerScoreboard = playerStatsScoreboards.get(player.getUniqueId());
+        if(playerScoreboard == null) {
+            playerScoreboard = getServer().getScoreboardManager().getNewScoreboard();
+            playerStatsScoreboards.put(player.getUniqueId(), playerScoreboard);
+            registeredScoreboards.add(playerScoreboard);
+        }
+        setPlayerScoreboardTeam(player);
+        player.setScoreboard(playerScoreboard);
+        statsKeeper.refreshStats(player);
+
     }
 
-    private final ArrayList<Scoreboard> registeredScoreboards = new ArrayList<>();
-    private boolean mainScoreboardRegistered = false;
-
-    public void setPlayerScoreboardTeam(Player ply) {
+    private void setPlayerScoreboardTeam(Player ply) {
         setPlayerScoreboardTeam(ply, permissionHandler.getGroup(ply.getUniqueId()));
     }
 
-    public void setPlayerScoreboardTeam(Player ply, String rank) {
+
+    private void setPlayerScoreboardTeam(Player ply, String rank) {
         if(!mainScoreboardRegistered) {
             registeredScoreboards.add(getServer().getScoreboardManager().getMainScoreboard());
             mainScoreboardRegistered = true;
@@ -88,15 +125,16 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
                     oldTeam.removeEntry(sbEntry);
                 }
             }
-            if(playerAlreadyInTeam)
+            if(playerAlreadyInTeam) {
                 continue;
+            }
             Team team = scoreboard.getTeam(rank);
             if(team == null) {
                 team = scoreboard.registerNewTeam(rank);
                 team.setPrefix(permissionHandler.getGroupTag(rank));
                 team.setSuffix("\u00a7r");
             }
-            team.addPlayer(ply);
+            team.addEntry(sbEntry);
         }
     }
 

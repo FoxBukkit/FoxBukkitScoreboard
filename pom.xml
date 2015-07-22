@@ -94,6 +94,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot</artifactId>
+			<version>1.8.7-R0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.foxelbox</groupId>
 			<artifactId>FoxBukkitPermissions</artifactId>
 			<version>1.1.0-SNAPSHOT</version>
@@ -104,6 +110,12 @@
             <artifactId>ConfigDependency</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+		<dependency>
+			<groupId>com.webkonsept.minecraft.lagmeter</groupId>
+			<artifactId>LagMeter</artifactId>
+			<version>1.16.0</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
     <repositories>
         <repository>
