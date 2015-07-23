@@ -67,7 +67,7 @@ public class StatsKeeper {
         final String sidebarName = (oldSidebar != null && oldSidebar.getName().equals(FBSTATS_SIDEBAR)) ? FBSTATS_SIDEBAR_ALT : FBSTATS_SIDEBAR;
         Objective sidebar = scoreboard.registerNewObjective(sidebarName, sidebarName);
         sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
-        sidebar.setDisplayName("\u00a7dFoxel\u00a75Box");
+        sidebar.setDisplayName("\u00a7d\u00a7lFoxel\u00a75\u00a7lBox");
         statsSidebar.put(player.getUniqueId(), sidebar);
 
         Objective belowName = statsBelowName.get(player.getUniqueId());
