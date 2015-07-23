@@ -28,6 +28,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -59,7 +60,7 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
             public void rankChanged(UUID uuid, String rank) {
                 Player ply = getServer().getPlayer(uuid);
                 if (ply != null) {
-                    setPlayerScoreboardTeam(ply, rank);
+                    setPlayerScoreboardTeam(ply, rank, registeredScoreboards);
                 }
             }
         });
@@ -87,6 +88,13 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
         statsKeeper.onDisconnect(event.getPlayer());
     }
 
+    private void registerScoreboard(Scoreboard scoreboard) {
+        ArrayList<Scoreboard> sbList = new ArrayList<>(1);
+        sbList.add(scoreboard);
+        registeredScoreboards.add(scoreboard);
+        refreshScoreboards(sbList);
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
@@ -94,27 +102,26 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
         if(playerScoreboard == null) {
             playerScoreboard = getServer().getScoreboardManager().getNewScoreboard();
             playerStatsScoreboards.put(player.getUniqueId(), playerScoreboard);
-            registeredScoreboards.add(playerScoreboard);
-            refreshScoreboards();
+            registerScoreboard(playerScoreboard);
         }
-        setPlayerScoreboardTeam(player);
+        setPlayerScoreboardTeam(player, registeredScoreboards);
         player.setScoreboard(playerScoreboard);
         statsKeeper.refreshStats(player);
 
     }
 
-    private void setPlayerScoreboardTeam(Player ply) {
-        setPlayerScoreboardTeam(ply, permissionHandler.getGroup(ply.getUniqueId()));
+    private void setPlayerScoreboardTeam(Player ply, Iterable<Scoreboard> scoreboards) {
+        setPlayerScoreboardTeam(ply, permissionHandler.getGroup(ply.getUniqueId()), scoreboards);
     }
 
 
-    private void setPlayerScoreboardTeam(Player ply, String rank) {
+    private void setPlayerScoreboardTeam(Player ply, String rank, Iterable<Scoreboard> scoreboards) {
         if(!mainScoreboardRegistered) {
             registeredScoreboards.add(getServer().getScoreboardManager().getMainScoreboard());
             mainScoreboardRegistered = true;
         }
         String sbEntry = ply.getName();
-        for(Scoreboard scoreboard : registeredScoreboards) {
+        for(Scoreboard scoreboard : scoreboards) {
             boolean playerAlreadyInTeam = false;
             for(Team oldTeam : scoreboard.getTeams()) {
                 if(oldTeam.getName().equals(rank)) {
@@ -139,16 +146,15 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
         }
     }
 
-    private void refreshScoreboards() {
+    private void refreshScoreboards(Iterable<Scoreboard> scoreboards) {
         for(Player ply : getServer().getOnlinePlayers()) {
-            setPlayerScoreboardTeam(ply);
+            setPlayerScoreboardTeam(ply, scoreboards);
         }
     }
 
     public Scoreboard createScoreboard() {
         Scoreboard scoreboard = getServer().getScoreboardManager().getNewScoreboard();
-        registeredScoreboards.add(scoreboard);
-        refreshScoreboards();
+        registerScoreboard(scoreboard);
         return scoreboard;
     }
 }
