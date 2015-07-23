@@ -95,6 +95,7 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
             playerScoreboard = getServer().getScoreboardManager().getNewScoreboard();
             playerStatsScoreboards.put(player.getUniqueId(), playerScoreboard);
             registeredScoreboards.add(playerScoreboard);
+            refreshScoreboards();
         }
         setPlayerScoreboardTeam(player);
         player.setScoreboard(playerScoreboard);
