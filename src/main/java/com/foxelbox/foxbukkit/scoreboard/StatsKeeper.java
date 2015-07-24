@@ -32,6 +32,8 @@ public class StatsKeeper {
     private static final String FBSTATS_SIDEBAR_ALT = "fbstats_sbr2";
     private static final String FBSTATS_PINGINFO = "fbstats_ping";
 
+    private static final String FOXELBOX_TITLE = "\u00a7d\u00a7lFoxel\u00a75\u00a7lBox";
+
     private HashMap<UUID, Objective> statsSidebar = new HashMap<>();
     private HashMap<UUID, Objective> statsBelowName = new HashMap<>();
 
@@ -67,14 +69,13 @@ public class StatsKeeper {
         final String sidebarName = (oldSidebar != null && oldSidebar.getName().equals(FBSTATS_SIDEBAR)) ? FBSTATS_SIDEBAR_ALT : FBSTATS_SIDEBAR;
         Objective sidebar = scoreboard.registerNewObjective(sidebarName, sidebarName);
         sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
-        sidebar.setDisplayName("\u00a7d\u00a7lFoxel\u00a75\u00a7lBox");
+        sidebar.setDisplayName(FOXELBOX_TITLE);
         statsSidebar.put(player.getUniqueId(), sidebar);
 
         Objective belowName = statsBelowName.get(player.getUniqueId());
         if(belowName == null) {
             belowName = scoreboard.registerNewObjective(FBSTATS_PINGINFO, FBSTATS_PINGINFO);
             belowName.setDisplaySlot(DisplaySlot.PLAYER_LIST);
-            belowName.setDisplayName("ms");
             statsBelowName.put(player.getUniqueId(), belowName);
         }
 
