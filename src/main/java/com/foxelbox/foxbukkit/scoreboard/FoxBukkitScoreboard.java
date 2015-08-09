@@ -122,25 +122,13 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
         }
         String sbEntry = ply.getName();
         for(Scoreboard scoreboard : scoreboards) {
-            boolean playerAlreadyInTeam = false;
-            for(Team oldTeam : scoreboard.getTeams()) {
-                if(oldTeam.getName().equals(rank)) {
-                    if (oldTeam.hasEntry(sbEntry)) {
-                        playerAlreadyInTeam = true;
-                        break;
-                    }
-                } else {
-                    oldTeam.removeEntry(sbEntry);
-                }
-            }
-            if(playerAlreadyInTeam) {
-                continue;
-            }
             Team team = scoreboard.getTeam(rank);
             if(team == null) {
                 team = scoreboard.registerNewTeam(rank);
                 team.setPrefix(permissionHandler.getGroupTag(rank));
                 team.setSuffix("\u00a7r");
+            } else if (team.hasEntry(sbEntry)) {
+                continue;
             }
             team.addEntry(sbEntry);
         }
