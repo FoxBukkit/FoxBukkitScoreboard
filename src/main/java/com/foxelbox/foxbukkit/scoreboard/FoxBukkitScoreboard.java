@@ -121,7 +121,7 @@ public class FoxBukkitScoreboard extends JavaPlugin implements Listener {
             mainScoreboardRegistered = true;
         }
         String sbEntry = ply.getName();
-        String teamName = String.format("rank%09d", permissionHandler.getImmunityLevel(rank));
+        String teamName = String.format("rank%09d", permissionHandler.getImmunityLevel(rank) + 100);
         String correctPrefix = permissionHandler.getGroupTag(rank);
         for(Scoreboard scoreboard : scoreboards) {
             Team team = scoreboard.getTeam(teamName);
