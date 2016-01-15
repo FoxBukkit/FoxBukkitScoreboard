@@ -35,7 +35,6 @@ public class StatsKeeper {
     private static final String FOXELBOX_TITLE = "\u00a7d\u00a7lFoxel\u00a75\u00a7lBox";
 
     private HashMap<UUID, Objective> statsSidebar = new HashMap<>();
-    private HashMap<UUID, Objective> statsBelowName = new HashMap<>();
 
     private final FoxBukkitScoreboard plugin;
     StatsKeeper(FoxBukkitScoreboard plugin) {
@@ -50,12 +49,10 @@ public class StatsKeeper {
 
     void onDisconnect(Player ply) {
         statsSidebar.remove(ply.getUniqueId());
-        statsBelowName.remove(ply.getUniqueId());
     }
 
     void onDisable() {
         statsSidebar.clear();
-        statsBelowName.clear();
     }
 
     private int getPlayerPing(final Player player) {
@@ -71,13 +68,6 @@ public class StatsKeeper {
         sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
         sidebar.setDisplayName(FOXELBOX_TITLE);
         statsSidebar.put(player.getUniqueId(), sidebar);
-
-        Objective belowName = statsBelowName.get(player.getUniqueId());
-        if(belowName == null) {
-            belowName = scoreboard.registerNewObjective(FBSTATS_PINGINFO, FBSTATS_PINGINFO);
-            belowName.setDisplaySlot(DisplaySlot.PLAYER_LIST);
-            statsBelowName.put(player.getUniqueId(), belowName);
-        }
 
         String tps;
         try {
@@ -101,10 +91,6 @@ public class StatsKeeper {
         sidebar.getScore("\u00a72\u00a7lTPS: \u00a7r" + tps).setScore(3);
         sidebar.getScore("\u00a74\u00a7lRank: \u00a7r" + rankTag + rank).setScore(2);
         sidebar.getScore("\u00a71\u00a7lPing: \u00a7r" + getPlayerPing(player) + "ms").setScore(1);
-
-        for(Player ply : plugin.getServer().getOnlinePlayers()) {
-            belowName.getScore(ply.getName()).setScore(getPlayerPing(ply));
-        }
 
         if(oldSidebar != null) {
             oldSidebar.unregister();
