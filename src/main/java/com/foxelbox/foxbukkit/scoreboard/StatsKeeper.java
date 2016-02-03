@@ -36,14 +36,38 @@ public class StatsKeeper {
 
     private HashMap<UUID, Objective> statsSidebar = new HashMap<>();
 
+    private String tps;
+
     private final FoxBukkitScoreboard plugin;
     StatsKeeper(FoxBukkitScoreboard plugin) {
         this.plugin = plugin;
     }
 
     void refreshAllStats() {
+        String _tps;
+        try {
+            final double tpsNumber = LagMeter.getInstance().getTPS();
+            final char tpsColor;
+            if(tpsNumber < 15D) {
+                tpsColor = 'c';
+            } else if(tpsNumber < 18D) {
+                tpsColor = 'e';
+            } else {
+                tpsColor = 'a';
+            }
+            _tps = String.format("\u00a7%c%.1f", tpsColor, tpsNumber);
+        } catch (NoAvailableTPSException e) {
+            _tps = "N/A";
+        }
+
+        tps = "\u00a72\u00a7lTPS: \u00a7r" + _tps;
+
         for(Player ply : plugin.getServer().getOnlinePlayers()) {
-            refreshStats(ply);
+            try {
+                refreshStats(ply);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -69,26 +93,10 @@ public class StatsKeeper {
         sidebar.setDisplayName(FOXELBOX_TITLE);
         statsSidebar.put(player.getUniqueId(), sidebar);
 
-        String tps;
-        try {
-            final double tpsNumber = LagMeter.getInstance().getTPS();
-            final char tpsColor;
-            if(tpsNumber < 15D) {
-                tpsColor = 'c';
-            } else if(tpsNumber < 18D) {
-                tpsColor = 'e';
-            } else {
-                tpsColor = 'a';
-            }
-            tps = String.format("\u00a7%c%.1f", tpsColor, tpsNumber);
-        } catch (NoAvailableTPSException e) {
-            tps = "N/A";
-        }
-
         final String rank = plugin.permissionHandler.getGroup(player);
         final String rankTag = plugin.permissionHandler.getGroupTag(rank);
 
-        sidebar.getScore("\u00a72\u00a7lTPS: \u00a7r" + tps).setScore(3);
+        sidebar.getScore(tps).setScore(3);
         sidebar.getScore("\u00a74\u00a7lRank: \u00a7r" + rankTag + rank).setScore(2);
         sidebar.getScore("\u00a71\u00a7lPing: \u00a7r" + getPlayerPing(player) + "ms").setScore(1);
 
