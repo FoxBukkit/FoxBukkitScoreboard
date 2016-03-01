@@ -36,7 +36,7 @@ public class StatsKeeper {
 
     private HashMap<UUID, Objective> statsSidebar = new HashMap<>();
 
-    private String tps;
+    private String tps = "N/A";
 
     private final FoxBukkitScoreboard plugin;
     StatsKeeper(FoxBukkitScoreboard plugin) {
