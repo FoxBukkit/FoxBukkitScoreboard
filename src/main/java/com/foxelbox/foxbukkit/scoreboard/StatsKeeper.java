@@ -18,7 +18,7 @@ package com.foxelbox.foxbukkit.scoreboard;
 
 import com.webkonsept.minecraft.lagmeter.LagMeter;
 import com.webkonsept.minecraft.lagmeter.exceptions.NoAvailableTPSException;
-import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_9_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
